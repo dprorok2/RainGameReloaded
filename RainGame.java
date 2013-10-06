@@ -2,7 +2,7 @@ import java.awt.Color;
 
 //UIUC CS125 FALL 2013 MP. File: RainGame.java, CS125 Project: PairProgramming, Version: 2013-10-01T11:04:49-0500.033586324
 /**
- * @author dprorok2
+ * @author dprorok2, kortend2
  */
 public class RainGame {
 
@@ -17,16 +17,26 @@ public class RainGame {
 		Color backgroundColor=new Color(0,0,0);
 		String text = "";
 		boolean leveledDown=false;
+		boolean leveledUp=false;
 		long startTime =System.currentTimeMillis();
 		
 		Zen.setFont("Helvetica-64");
 		while (Zen.isRunning()) {
+			
+			if(leveledUp)
+				Zen.sleep(200);
+				
 			if(leveledDown)
 				Zen.sleep(500);
+			
 			leveledDown=false;
+			leveledUp=false;
 			
 			if (text.length() == 0) {
-				x = Zen.getZenWidth()/2;
+				if(level<70)
+					x = Zen.getZenWidth()/2-10*(level/10)-15;
+				else
+					x = Zen.getZenWidth()/2-15*(6);
 				y = Zen.getZenHeight() / 2;
 				if(Math.random()>.5)
 					dxSign*=-1;
@@ -42,7 +52,10 @@ public class RainGame {
 					dx = dxSign*(15+(int) (Math.random() * 2));
 					dy = dySign*(15+(int) (Math.random() * 2));
 				}
+				if(level<70)
 				text = "" + (int) (Math.random() * (999*(Math.pow(10, level/10))));
+				else
+					text = "" + (int) (Math.random() * (999*(Math.pow(10, 6))));
 				long elapsed = System.currentTimeMillis() - startTime;
 				startTime = System.currentTimeMillis();
 				score += (10000 / elapsed)*level;
@@ -53,16 +66,49 @@ public class RainGame {
 				if (level>10)
 				backgroundColor = new Color((int) (Math.random() * 255),(int) (Math.random() * 255),(int) (Math.random() * 255));
 			}
+
+			if(Zen.isKeyPressed('+')||Zen.isKeyPressed('='))
+			{
+				level++;
+				if(level<70)
+					x = Zen.getZenWidth()/2-10*(level/10)-15;
+				else
+					x = Zen.getZenWidth()/2-15*(6);
+				y = Zen.getZenHeight() / 2;
+				if(Math.random()>.5)
+					dxSign*=-1;
+				if(Math.random()>.5)
+					dySign*=-1;
+				if(level<15)
+				{
+				dx = dxSign*(level+(int) (Math.random() * 5));
+				dy = dySign*(level+(int) (Math.random() * 5));
+				}
+				else
+				{
+					dx = dxSign*(15+(int) (Math.random() * 2));
+					dy = dySign*(15+(int) (Math.random() * 2));
+				}
+				if(level<70)
+					text = "" + (int) (Math.random() * (999*(Math.pow(10, level/10))));
+				else
+					text = "" + (int) (Math.random() * (999*(Math.pow(10, 6))));
+				if(level>5)
+				textColor= new Color((int) (Math.random() * 255),(int) (Math.random() * 255),(int) (Math.random() * 255));
+				if (level>10)
+				backgroundColor = new Color((int) (Math.random() * 255),(int) (Math.random() * 255),(int) (Math.random() * 255));
+				leveledUp=true;
+			}
 			
 			if(Zen.isKeyPressed('\n')&&!leveledDown)
 			{
 				if(level>1)
 				level--;
-				if(score-(int)(.2*score)-5>0)
-				score-=(int)(.2*score)+5;
+				if((score-(int)(score/(level))>0))
+				score-=(int)(score/(level));
 				else score=0;
 				
-				x = Zen.getZenWidth()/2;
+				x = Zen.getZenWidth()/2-5*level/10;
 				y = Zen.getZenHeight() / 2;
 				if(Math.random()>.5)
 					dxSign*=-1;
@@ -94,9 +140,9 @@ public class RainGame {
 			Zen.drawText("Level: "+level,10,50);
 			Zen.drawText("Score: "+score,10,100);
 			
-			Zen.setFont("Helvetica-32");
+			Zen.setFont("Helvetica-22");
 			Zen.setColor(255,255,255);
-			Zen.drawText("Press enter if you miss a number.",0,Zen.getZenHeight()-3);
+			Zen.drawText("Press enter if you miss a number. Press plus key to increase level.",0,Zen.getZenHeight()-3);
 			Zen.setFont("Helvetica-64");
 			
 			x += dx;
@@ -112,8 +158,8 @@ public class RainGame {
 				char c = user.charAt(i);
 				if(c == text.charAt(0))
 					text = text.substring(1,text.length()); // all except first character
-				else if(score-level>0)score -=level;
-				else score=0;
+				else if(score-level>0&&c!='+'&&c!='=')score -=level/2;
+				else if(c!='+'&&c!='=')score=0;
 			}
 
 				Zen.sleep(90);// sleep for 90 milliseconds
